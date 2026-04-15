@@ -2,7 +2,7 @@ param(
     [string]$Runtime = "win-x64"
 )
 
-$project = "src/BatteryBuddy.App/BatteryBuddy.App.csproj"
+$project = "src/HausListrik.App/HausListrik.App.csproj"
 
 dotnet publish $project `
     -c Release `
