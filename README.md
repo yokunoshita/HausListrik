@@ -7,13 +7,13 @@ Haus Listrik is a hardware-abuse humor application for Windows built with C#. It
 Thirsty Feedback: Triggers suggestive moans or aggressive sighs when the charger is unplugged.
 The Roasting Engine: Uses Windows TTS to insult your financial status, your memory, or your audacity to use the laptop at 5% battery.
 Dynamic Mood Swings:
-100% - 80%: Arrogant and god-like.
+- 100% - 80%: Arrogant and god-like.
 
-50%: Passive-aggressive comments about your life choices.
+- 50%: Passive-aggressive comments about your life choices.
 
-20%: Full-blown panic attacks and public shaming.
+- 20%: Full-blown panic attacks and public shaming.
 
-5%: Screams "DARKNESS IS COMING" at max volume.
+- 5%: Screams "DARKNESS IS COMING" at max volume.
 
 Stealth Mode: Runs quietly in the System Tray. Your friends won't know why your laptop is talking trash until it's too late.
 
