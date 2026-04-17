@@ -1,4 +1,3 @@
-using System.Windows;
 using HausListrik.App.Configuration;
 using HausListrik.App.Infrastructure.Audio;
 using HausListrik.App.Infrastructure.Battery;
@@ -8,12 +7,12 @@ using HausListrik.App.Services;
 
 namespace HausListrik.App;
 
-public partial class App : Application
+public partial class App : System.Windows.Application
 {
     private BatteryExperienceCoordinator? _coordinator;
     private ITrayIconService? _trayIconService;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
         base.OnStartup(e);
 
@@ -67,7 +66,7 @@ public partial class App : Application
         mainWindow.Show();
     }
 
-    protected override void OnExit(ExitEventArgs e)
+    protected override void OnExit(System.Windows.ExitEventArgs e)
     {
         _trayIconService?.Dispose();
         _coordinator?.Dispose();

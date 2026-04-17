@@ -1,3 +1,5 @@
+using HausListrik.App.Configuration;
+
 namespace HausListrik.App.Infrastructure.Audio;
 
 public interface IAudioNotifier

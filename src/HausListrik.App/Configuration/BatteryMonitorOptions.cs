@@ -18,7 +18,7 @@ public sealed record BatteryMonitorOptions
 
     public bool ChargingBurstEnabled { get; init; } = true;
 
-    public bool StartMinimizedToTray { get; init; } = true;
+    public bool StartMinimizedToTray { get; init; } = false;
 
     public bool MinimizeToTrayOnClose { get; init; } = true;
 }
