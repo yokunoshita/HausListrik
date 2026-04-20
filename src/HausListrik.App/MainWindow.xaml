@@ -162,6 +162,23 @@
 
                     <TextBlock Margin="0,18,0,0"
                                Foreground="#AAB6CC"
+                               Text="Active voice pack" />
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="110" />
+                        </Grid.ColumnDefinitions>
+                        <ComboBox ItemsSource="{Binding AvailableVoicePacks}"
+                                  SelectedItem="{Binding SelectedVoicePack, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="2"
+                                Height="30"
+                                Command="{Binding RefreshVoicePacksCommand}"
+                                Content="Refresh" />
+                    </Grid>
+
+                    <TextBlock Margin="0,18,0,0"
+                               Foreground="#AAB6CC"
                                Text="Polling interval (seconds)" />
                     <Slider Margin="0,8,0,0"
                             Minimum="2"
@@ -215,6 +232,10 @@
                                Foreground="#AAB6CC"
                                TextWrapping="Wrap"
                                Text="{Binding VoicePackDirectoryLabel}" />
+                    <TextBlock Margin="0,8,0,0"
+                               Foreground="#AAB6CC"
+                               TextWrapping="Wrap"
+                               Text="Pisahkan tiap karakter ke subfolder sendiri di bawah Assets\VoicePack, lalu pilih pack-nya dari dropdown." />
 
                     <TextBlock Margin="0,24,0,0"
                                FontSize="20"

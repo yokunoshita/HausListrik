@@ -1,6 +1,12 @@
 # Voice Pack
 
-Taruh file `.wav` di folder ini untuk mengganti TTS bawaan.
+Taruh setiap voice pack di subfolder terpisah di dalam folder ini.
+
+Contoh struktur:
+
+- `Assets/VoicePack/Default`
+- `Assets/VoicePack/DramaQueen`
+- `Assets/VoicePack/KaryawanBurnout`
 
 Penamaan file:
 

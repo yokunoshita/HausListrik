@@ -20,16 +20,16 @@ Haus Listrik adalah MVP aplikasi Windows yang bikin baterai laptop punya kepriba
 
 ## Struktur
 
-- `src/BatteryBuddy.App/Configuration`: settings dan persistence
-- `src/BatteryBuddy.App/Domain`: model inti
-- `src/BatteryBuddy.App/Infrastructure`: integrasi Windows-specific
-- `src/BatteryBuddy.App/Services`: orchestration logic
-- `src/BatteryBuddy.App/Presentation`: command dan view model
+- `src/HausListrik.App/Configuration`: settings dan persistence
+- `src/HausListrik.App/Domain`: model inti
+- `src/HausListrik.App/Infrastructure`: integrasi Windows-specific
+- `src/HausListrik.App/Services`: orchestration logic
+- `src/HausListrik.App/Presentation`: command dan view model
 
 ## Cara Menjalankan di Windows
 
 1. Install .NET 8 SDK
-2. Buka solution `BatteryBuddy.sln`
+2. Buka solution `HausListrik.sln`
 3. Jalankan restore:
 
 ```bash
@@ -39,7 +39,7 @@ dotnet restore
 4. Jalankan app:
 
 ```bash
-dotnet run --project src/BatteryBuddy.App/BatteryBuddy.App.csproj
+dotnet run --project src/HausListrik.App/HausListrik.App.csproj
 ```
 
 Default behavior:
@@ -50,23 +50,29 @@ Default behavior:
 
 ## Voice Pack Kustom
 
-Folder voice pack ada di:
+Root voice pack ada di:
 
-- `src/BatteryBuddy.App/Assets/VoicePack`
+- `src/HausListrik.App/Assets/VoicePack`
 
-Kamu bisa isi file `.wav` dengan pola:
+Setiap voice pack sebaiknya ada di subfolder sendiri, misalnya:
+
+- `Default`
+- `DramaQueen`
+- `KaryawanBurnout`
+
+Isi file `.wav` di dalam subfolder itu dengan pola:
 
 - `drop-01.wav`
 - `critical-01.wav`
 - `charging-01.wav`
 
-Kalau file belum tersedia, app akan fallback ke TTS.
+Kalau file belum tersedia, app akan fallback ke TTS. Pack aktif bisa dipilih langsung dari UI.
 
 ## Packaging
 
 Sudah disiapkan dua jalur publish:
 
-- publish profile: `src/BatteryBuddy.App/Properties/PublishProfiles/FolderProfile.pubxml`
+- publish profile: `src/HausListrik.App/Properties/PublishProfiles/FolderProfile.pubxml`
 - script PowerShell: `scripts/publish-win.ps1`
 
 Contoh:

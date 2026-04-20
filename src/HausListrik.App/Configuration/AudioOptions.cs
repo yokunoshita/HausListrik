@@ -10,7 +10,9 @@ public sealed record AudioOptions
 
     public string VoiceName { get; init; } = string.Empty;
 
-    public string VoicePackDirectory { get; init; } = "Assets\\VoicePack";
+    public string VoicePackRootDirectory { get; init; } = "Assets\\VoicePack";
+
+    public string VoicePackDirectory { get; init; } = "Assets\\VoicePack\\Default";
 
     public bool PreferAudioFiles { get; init; } = true;
 }

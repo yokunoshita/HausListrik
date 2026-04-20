@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using HausListrik.App.Configuration;
@@ -20,6 +21,7 @@ public sealed class MainViewModel : ViewModelBase
     private string _lastSpokenLine = "Belum ada suara.";
     private string _diagnostics = "Menunggu monitor berjalan.";
     private bool _isMonitoring;
+    private string? _selectedVoicePack;
 
     public MainViewModel(
         BatteryExperienceCoordinator coordinator,
@@ -42,6 +44,10 @@ public sealed class MainViewModel : ViewModelBase
         StopCommand = new RelayCommand(StopMonitoring, () => _isMonitoring);
         SaveSettingsCommand = new RelayCommand(SaveSettings);
         OpenVoicePackFolderCommand = new RelayCommand(OpenVoicePackFolder);
+        RefreshVoicePacksCommand = new RelayCommand(RefreshVoicePacks);
+
+        AvailableVoicePacks = new ObservableCollection<string>();
+        RefreshVoicePacks();
 
         _coordinator.StateChanged += OnStateChanged;
         StartMonitoring();
@@ -101,6 +107,26 @@ public sealed class MainViewModel : ViewModelBase
 
     public string VoicePackDirectoryLabel => $"Voice pack folder: {_settings.Audio.VoicePackDirectory}";
 
+    public ObservableCollection<string> AvailableVoicePacks { get; }
+
+    public string? SelectedVoicePack
+    {
+        get => _selectedVoicePack;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value) || _selectedVoicePack == value)
+            {
+                return;
+            }
+
+            _selectedVoicePack = value;
+            RaisePropertyChanged();
+
+            var directory = BuildVoicePackPath(value);
+            UpdateAudioOptions(_settings.Audio with { VoicePackDirectory = directory });
+        }
+    }
+
     public bool IsChaosModeEnabled
     {
         get => _settings.BatteryMonitor.ChaosModeEnabled;
@@ -139,6 +165,8 @@ public sealed class MainViewModel : ViewModelBase
     public ICommand SaveSettingsCommand { get; }
 
     public ICommand OpenVoicePackFolderCommand { get; }
+
+    public ICommand RefreshVoicePacksCommand { get; }
 
     private void StartMonitoring()
     {
@@ -181,6 +209,7 @@ public sealed class MainViewModel : ViewModelBase
         _coordinator.UpdateSettings(_settings.BatteryMonitor, options);
         RaisePropertyChanged(nameof(PreferAudioFiles));
         RaisePropertyChanged(nameof(VoicePackDirectoryLabel));
+        SynchronizeSelectedVoicePack();
     }
 
     private void UpdateStartupOptions(StartupOptions options)
@@ -214,6 +243,70 @@ public sealed class MainViewModel : ViewModelBase
         {
             Diagnostics = $"Folder voice pack siap dipakai di: {fullPath}";
         }
+    }
+
+    private void RefreshVoicePacks()
+    {
+        var rootDirectory = ResolveVoicePackRootDirectory();
+        Directory.CreateDirectory(rootDirectory);
+
+        var packDirectories = Directory.GetDirectories(rootDirectory)
+            .Select(Path.GetFileName)
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        AvailableVoicePacks.Clear();
+        foreach (var pack in packDirectories)
+        {
+            AvailableVoicePacks.Add(pack!);
+        }
+
+        if (AvailableVoicePacks.Count == 0)
+        {
+            Directory.CreateDirectory(Path.Combine(rootDirectory, "Default"));
+            AvailableVoicePacks.Add("Default");
+        }
+
+        SynchronizeSelectedVoicePack();
+        Diagnostics = $"Terdeteksi {AvailableVoicePacks.Count} voice pack.";
+    }
+
+    private void SynchronizeSelectedVoicePack()
+    {
+        var currentPack = Path.GetFileName(
+            _settings.Audio.VoicePackDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+
+        if (string.IsNullOrWhiteSpace(currentPack))
+        {
+            currentPack = "Default";
+        }
+
+        if (!AvailableVoicePacks.Contains(currentPack))
+        {
+            AvailableVoicePacks.Add(currentPack);
+        }
+
+        if (_selectedVoicePack != currentPack)
+        {
+            _selectedVoicePack = currentPack;
+            RaisePropertyChanged(nameof(SelectedVoicePack));
+        }
+    }
+
+    private string ResolveVoicePackRootDirectory()
+    {
+        if (Path.IsPathRooted(_settings.Audio.VoicePackRootDirectory))
+        {
+            return _settings.Audio.VoicePackRootDirectory;
+        }
+
+        return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _settings.Audio.VoicePackRootDirectory);
+    }
+
+    private string BuildVoicePackPath(string voicePackName)
+    {
+        return Path.Combine(_settings.Audio.VoicePackRootDirectory, voicePackName);
     }
 
     private void OnStateChanged(object? sender, BatteryExperienceState state)
