@@ -1,4 +1,3 @@
-using System.Timers;
 using HausListrik.App.Configuration;
 using HausListrik.App.Domain;
 using HausListrik.App.Infrastructure.Audio;
@@ -15,7 +14,7 @@ public sealed class BatteryExperienceCoordinator : IDisposable
     private readonly object _syncRoot = new();
 
     private BatteryMonitorOptions _options;
-    private Timer? _timer;
+    private System.Timers.Timer? _timer;
     private BatterySnapshot? _previousSnapshot;
     private string _lastVoiceLine = "Belum ada suara.";
 
@@ -91,9 +90,9 @@ public sealed class BatteryExperienceCoordinator : IDisposable
         }
     }
 
-    private Timer CreateTimer()
+    private System.Timers.Timer CreateTimer()
     {
-        var timer = new Timer(TimeSpan.FromSeconds(_options.PollingIntervalSeconds).TotalMilliseconds)
+        var timer = new System.Timers.Timer(TimeSpan.FromSeconds(_options.PollingIntervalSeconds).TotalMilliseconds)
         {
             AutoReset = true
         };
@@ -102,7 +101,7 @@ public sealed class BatteryExperienceCoordinator : IDisposable
         return timer;
     }
 
-    private void OnTimerElapsed(object? sender, ElapsedEventArgs e)
+    private void OnTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
         PollBatteryState();
     }

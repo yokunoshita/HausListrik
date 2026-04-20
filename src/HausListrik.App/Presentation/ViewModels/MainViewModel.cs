@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using HausListrik.App.Configuration;
@@ -311,7 +311,7 @@ public sealed class MainViewModel : ViewModelBase
 
     private void OnStateChanged(object? sender, BatteryExperienceState state)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        System.Windows.Application.Current.Dispatcher.Invoke(() =>
         {
             BatteryPercentageLabel = $"{state.Snapshot.Percentage}%";
             PowerSourceLabel = state.Snapshot.ChargeState switch
