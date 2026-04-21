@@ -1,4 +1,5 @@
 using System.Windows;
+using HausListrik.App.Branding;
 using HausListrik.App.Presentation.ViewModels;
 using HausListrik.App.Services;
 
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Icon = HausListrikIconFactory.CreateWindowIcon();
     }
 
     public void Attach(MainViewModel viewModel, ITrayIconService trayIconService)

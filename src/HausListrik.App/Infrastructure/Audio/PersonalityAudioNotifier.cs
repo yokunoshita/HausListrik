@@ -59,6 +59,64 @@ public sealed class PersonalityAudioNotifier : IAudioNotifier, IDisposable
         return line;
     }
 
+    public string PreviewBatteryDrop()
+    {
+        var line = $"{StandardBatteryLines[_random.Next(StandardBatteryLines.Length)]} Tinggal 23 persen.";
+        Play("drop", line, _options.DefaultVolume);
+        return line;
+    }
+
+    public string PreviewChargingBurst()
+    {
+        var line = ChargingLines[_random.Next(ChargingLines.Length)];
+        Play("charging", line, _options.ChargingVolume);
+        return line;
+    }
+
+    public VoicePackValidationResult ValidateActiveVoicePack()
+    {
+        var voicePackDirectory = ResolveVoicePackDirectory();
+
+        if (!_options.PreferAudioFiles)
+        {
+            return new VoicePackValidationResult(
+                false,
+                false,
+                "Custom audio dimatikan. App akan pakai TTS.",
+                0,
+                0,
+                0);
+        }
+
+        if (!Directory.Exists(voicePackDirectory))
+        {
+            return new VoicePackValidationResult(
+                false,
+                true,
+                $"Folder pack tidak ditemukan: {voicePackDirectory}",
+                0,
+                0,
+                0);
+        }
+
+        var dropCount = Directory.GetFiles(voicePackDirectory, "drop-*.wav", SearchOption.TopDirectoryOnly).Length;
+        var criticalCount = Directory.GetFiles(voicePackDirectory, "critical-*.wav", SearchOption.TopDirectoryOnly).Length;
+        var chargingCount = Directory.GetFiles(voicePackDirectory, "charging-*.wav", SearchOption.TopDirectoryOnly).Length;
+
+        var isValid = dropCount > 0 && criticalCount > 0 && chargingCount > 0;
+        var statusMessage = isValid
+            ? $"Voice pack siap. drop={dropCount}, critical={criticalCount}, charging={chargingCount}."
+            : $"Voice pack belum lengkap. drop={dropCount}, critical={criticalCount}, charging={chargingCount}.";
+
+        return new VoicePackValidationResult(
+            isValid,
+            true,
+            statusMessage,
+            dropCount,
+            criticalCount,
+            chargingCount);
+    }
+
     public void UpdateOptions(AudioOptions options)
     {
         _options = options;

@@ -14,9 +14,12 @@ public sealed class BatteryExperienceCoordinator : IDisposable
     private readonly object _syncRoot = new();
 
     private BatteryMonitorOptions _options;
+    private AudioOptions _audioOptions;
     private System.Timers.Timer? _timer;
     private BatterySnapshot? _previousSnapshot;
     private string _lastVoiceLine = "Belum ada suara.";
+    private DateTimeOffset _lastBatteryDropAnnouncementAt = DateTimeOffset.MinValue;
+    private DateTimeOffset _lastChargingAnnouncementAt = DateTimeOffset.MinValue;
 
     public BatteryExperienceCoordinator(
         IBatteryInfoProvider batteryInfoProvider,
@@ -29,6 +32,7 @@ public sealed class BatteryExperienceCoordinator : IDisposable
         _brightnessController = brightnessController;
         _audioNotifier = audioNotifier;
         _options = options;
+        _audioOptions = audioOptions;
         _audioNotifier.UpdateOptions(audioOptions);
     }
 
@@ -71,6 +75,7 @@ public sealed class BatteryExperienceCoordinator : IDisposable
         lock (_syncRoot)
         {
             _options = options;
+            _audioOptions = audioOptions;
             _audioNotifier.UpdateOptions(audioOptions);
 
             if (_timer is not null)
@@ -88,6 +93,23 @@ public sealed class BatteryExperienceCoordinator : IDisposable
         {
             disposableAudio.Dispose();
         }
+    }
+
+    public string PreviewBatteryDrop()
+    {
+        _lastVoiceLine = _audioNotifier.PreviewBatteryDrop();
+        return _lastVoiceLine;
+    }
+
+    public string PreviewChargingBurst()
+    {
+        _lastVoiceLine = _audioNotifier.PreviewChargingBurst();
+        return _lastVoiceLine;
+    }
+
+    public VoicePackValidationResult ValidateActiveVoicePack()
+    {
+        return _audioNotifier.ValidateActiveVoicePack();
     }
 
     private System.Timers.Timer CreateTimer()
@@ -151,9 +173,11 @@ public sealed class BatteryExperienceCoordinator : IDisposable
 
         if (options.ChargingBurstEnabled &&
             snapshot.IsPowerConnected &&
-            !_previousSnapshot.IsPowerConnected)
+            !_previousSnapshot.IsPowerConnected &&
+            CanAnnounceChargingBurst())
         {
             _lastVoiceLine = _audioNotifier.SpeakChargingRestored();
+            _lastChargingAnnouncementAt = DateTimeOffset.UtcNow;
             return _lastVoiceLine;
         }
 
@@ -162,13 +186,26 @@ public sealed class BatteryExperienceCoordinator : IDisposable
             return _lastVoiceLine;
         }
 
-        if (snapshot.Percentage < _previousSnapshot.Percentage)
+        if (snapshot.Percentage < _previousSnapshot.Percentage && CanAnnounceBatteryDrop())
         {
             var isCritical = snapshot.Percentage <= options.CriticalBatteryThreshold;
             _lastVoiceLine = _audioNotifier.SpeakBatteryDrop(snapshot.Percentage, isCritical);
+            _lastBatteryDropAnnouncementAt = DateTimeOffset.UtcNow;
         }
 
         return _lastVoiceLine;
+    }
+
+    private bool CanAnnounceBatteryDrop()
+    {
+        var cooldown = TimeSpan.FromSeconds(Math.Max(0, _audioOptions.BatteryDropCooldownSeconds));
+        return DateTimeOffset.UtcNow - _lastBatteryDropAnnouncementAt >= cooldown;
+    }
+
+    private bool CanAnnounceChargingBurst()
+    {
+        var cooldown = TimeSpan.FromSeconds(Math.Max(0, _audioOptions.ChargingBurstCooldownSeconds));
+        return DateTimeOffset.UtcNow - _lastChargingAnnouncementAt >= cooldown;
     }
 
     private string BuildDiagnostics(BatterySnapshot snapshot, BatteryMonitorOptions options, int appliedBrightness)

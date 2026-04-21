@@ -8,5 +8,11 @@ public interface IAudioNotifier
 
     string SpeakChargingRestored();
 
+    string PreviewBatteryDrop();
+
+    string PreviewChargingBurst();
+
+    VoicePackValidationResult ValidateActiveVoicePack();
+
     void UpdateOptions(AudioOptions options);
 }

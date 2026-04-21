@@ -1,8 +1,10 @@
 using System.IO;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using HausListrik.App.Configuration;
 using HausListrik.App.Domain;
+using HausListrik.App.Infrastructure.Audio;
 using HausListrik.App.Presentation.Commands;
 using HausListrik.App.Services;
 
@@ -22,6 +24,8 @@ public sealed class MainViewModel : ViewModelBase
     private string _diagnostics = "Menunggu monitor berjalan.";
     private bool _isMonitoring;
     private string? _selectedVoicePack;
+    private string _voicePackStatus = "Belum divalidasi.";
+    private string _audioModeLabel = "Audio mode: TTS";
 
     public MainViewModel(
         BatteryExperienceCoordinator coordinator,
@@ -45,6 +49,8 @@ public sealed class MainViewModel : ViewModelBase
         SaveSettingsCommand = new RelayCommand(SaveSettings);
         OpenVoicePackFolderCommand = new RelayCommand(OpenVoicePackFolder);
         RefreshVoicePacksCommand = new RelayCommand(RefreshVoicePacks);
+        TestBatteryVoiceCommand = new RelayCommand(TestBatteryVoice);
+        TestChargingVoiceCommand = new RelayCommand(TestChargingVoice);
 
         AvailableVoicePacks = new ObservableCollection<string>();
         RefreshVoicePacks();
@@ -109,6 +115,18 @@ public sealed class MainViewModel : ViewModelBase
 
     public ObservableCollection<string> AvailableVoicePacks { get; }
 
+    public string VoicePackStatus
+    {
+        get => _voicePackStatus;
+        private set => SetProperty(ref _voicePackStatus, value);
+    }
+
+    public string AudioModeLabel
+    {
+        get => _audioModeLabel;
+        private set => SetProperty(ref _audioModeLabel, value);
+    }
+
     public string? SelectedVoicePack
     {
         get => _selectedVoicePack;
@@ -168,6 +186,10 @@ public sealed class MainViewModel : ViewModelBase
 
     public ICommand RefreshVoicePacksCommand { get; }
 
+    public ICommand TestBatteryVoiceCommand { get; }
+
+    public ICommand TestChargingVoiceCommand { get; }
+
     private void StartMonitoring()
     {
         _coordinator.UpdateSettings(_settings.BatteryMonitor, _settings.Audio);
@@ -189,6 +211,7 @@ public sealed class MainViewModel : ViewModelBase
         _startupRegistrationService.SetEnabled(_settings.Startup.LaunchOnWindowsStartup);
         _settingsProvider.Save(_settings);
         Diagnostics = "Pengaturan berhasil disimpan ke appsettings.json.";
+        RefreshVoicePackStatus();
     }
 
     private void UpdateBatteryOptions(BatteryMonitorOptions options)
@@ -210,6 +233,7 @@ public sealed class MainViewModel : ViewModelBase
         RaisePropertyChanged(nameof(PreferAudioFiles));
         RaisePropertyChanged(nameof(VoicePackDirectoryLabel));
         SynchronizeSelectedVoicePack();
+        RefreshVoicePackStatus();
     }
 
     private void UpdateStartupOptions(StartupOptions options)
@@ -270,6 +294,7 @@ public sealed class MainViewModel : ViewModelBase
 
         SynchronizeSelectedVoicePack();
         Diagnostics = $"Terdeteksi {AvailableVoicePacks.Count} voice pack.";
+        RefreshVoicePackStatus();
     }
 
     private void SynchronizeSelectedVoicePack()
@@ -307,6 +332,39 @@ public sealed class MainViewModel : ViewModelBase
     private string BuildVoicePackPath(string voicePackName)
     {
         return Path.Combine(_settings.Audio.VoicePackRootDirectory, voicePackName);
+    }
+
+    private void TestBatteryVoice()
+    {
+        LastSpokenLine = _coordinator.PreviewBatteryDrop();
+        Diagnostics = "Preview battery-drop dimainkan.";
+        RefreshVoicePackStatus();
+    }
+
+    private void TestChargingVoice()
+    {
+        LastSpokenLine = _coordinator.PreviewChargingBurst();
+        Diagnostics = "Preview charging-burst dimainkan.";
+        RefreshVoicePackStatus();
+    }
+
+    private void RefreshVoicePackStatus()
+    {
+        var validation = _coordinator.ValidateActiveVoicePack();
+        VoicePackStatus = validation.StatusMessage;
+        AudioModeLabel = ResolveAudioModeLabel(validation);
+    }
+
+    private static string ResolveAudioModeLabel(VoicePackValidationResult validation)
+    {
+        if (!validation.IsUsingAudioFiles)
+        {
+            return "Audio mode: Windows Speech";
+        }
+
+        return validation.IsValid
+            ? "Audio mode: Custom WAV"
+            : "Audio mode: WAV selected, fallback to TTS";
     }
 
     private void OnStateChanged(object? sender, BatteryExperienceState state)

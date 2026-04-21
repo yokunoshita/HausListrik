@@ -176,6 +176,13 @@
                                 Command="{Binding RefreshVoicePacksCommand}"
                                 Content="Refresh" />
                     </Grid>
+                    <TextBlock Margin="0,8,0,0"
+                               Foreground="#D8E1F1"
+                               Text="{Binding AudioModeLabel}" />
+                    <TextBlock Margin="0,6,0,0"
+                               Foreground="#AAB6CC"
+                               TextWrapping="Wrap"
+                               Text="{Binding VoicePackStatus}" />
 
                     <TextBlock Margin="0,18,0,0"
                                Foreground="#AAB6CC"
@@ -190,8 +197,8 @@
                                Foreground="#D8E1F1"
                                Text="{Binding PollingIntervalLabel}" />
 
-                    <StackPanel Margin="0,22,0,0"
-                                Orientation="Horizontal">
+                    <WrapPanel Margin="0,22,0,0"
+                               ItemHeight="38">
                         <Button Width="110"
                                 Height="38"
                                 Margin="0,0,12,0"
@@ -209,9 +216,20 @@
                                 Content="Save Settings" />
                         <Button Width="160"
                                 Height="38"
+                                Margin="0,0,12,0"
                                 Command="{Binding OpenVoicePackFolderCommand}"
                                 Content="Open Voice Pack" />
-                    </StackPanel>
+                        <Button Width="140"
+                                Height="38"
+                                Margin="0,12,12,0"
+                                Command="{Binding TestBatteryVoiceCommand}"
+                                Content="Test Battery" />
+                        <Button Width="140"
+                                Height="38"
+                                Margin="0,12,0,0"
+                                Command="{Binding TestChargingVoiceCommand}"
+                                Content="Test Charging" />
+                    </WrapPanel>
                 </StackPanel>
             </Border>
 

@@ -15,4 +15,8 @@ public sealed record AudioOptions
     public string VoicePackDirectory { get; init; } = "Assets\\VoicePack\\Default";
 
     public bool PreferAudioFiles { get; init; } = true;
+
+    public int BatteryDropCooldownSeconds { get; init; } = 12;
+
+    public int ChargingBurstCooldownSeconds { get; init; } = 8;
 }

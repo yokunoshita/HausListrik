@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Windows.Forms;
+using HausListrik.App.Branding;
 using HausListrik.App.Presentation.ViewModels;
 
 namespace HausListrik.App.Services;
@@ -7,12 +8,14 @@ namespace HausListrik.App.Services;
 public sealed class WindowsTrayIconService : ITrayIconService
 {
     private NotifyIcon? _notifyIcon;
+    private Icon? _trayIcon;
 
     public void Initialize(MainViewModel viewModel, Action showWindow, Action exitApplication)
     {
+        _trayIcon = HausListrikIconFactory.CreateTrayIcon();
         _notifyIcon = new NotifyIcon
         {
-            Icon = SystemIcons.Information,
+            Icon = _trayIcon,
             Text = "Haus Listrik",
             Visible = false,
             ContextMenuStrip = BuildMenu(viewModel, showWindow, exitApplication)
@@ -59,6 +62,8 @@ public sealed class WindowsTrayIconService : ITrayIconService
         _notifyIcon.Visible = false;
         _notifyIcon.Dispose();
         _notifyIcon = null;
+        _trayIcon?.Dispose();
+        _trayIcon = null;
     }
 
     private static ContextMenuStrip BuildMenu(MainViewModel viewModel, Action showWindow, Action exitApplication)
